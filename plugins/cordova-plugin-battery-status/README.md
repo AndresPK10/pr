@@ -1,6 +1,6 @@
 ---
-title: Battery Status
-description: Get events for device battery level.
+title: Network Information
+description: Get information about wireless connectivity.
 ---
 <!--
 # license: Licensed to the Apache Software Foundation (ASF) under one
@@ -23,90 +23,281 @@ description: Get events for device battery level.
 
 |AppVeyor|Travis CI|
 |:-:|:-:|
-|[![Build status](https://ci.appveyor.com/api/projects/status/github/apache/cordova-plugin-battery-status?branch=master)](https://ci.appveyor.com/project/ApacheSoftwareFoundation/cordova-plugin-battery-status)|[![Build Status](https://travis-ci.org/apache/cordova-plugin-battery-status.svg?branch=master)](https://travis-ci.org/apache/cordova-plugin-battery-status)|
+|[![Build status](https://ci.appveyor.com/api/projects/status/github/apache/cordova-plugin-network-information?branch=master)](https://ci.appveyor.com/project/ApacheSoftwareFoundation/cordova-plugin-network-information)|[![Build Status](https://travis-ci.org/apache/cordova-plugin-network-information.svg?branch=master)](https://travis-ci.org/apache/cordova-plugin-network-information)|
 
-# cordova-plugin-battery-status
+# cordova-plugin-network-information
 
-This plugin provides an implementation of an old version of the [Battery Status Events API][w3c_spec]. It adds the following three events to the `window` object:
 
-* batterystatus
-* batterycritical
-* batterylow
+This plugin provides an implementation of an old version of the
+[Network Information API](http://www.w3.org/TR/2011/WD-netinfo-api-20110607/).
+It provides information about the device's cellular and
+wifi connection, and whether the device has an internet connection.
 
-Applications may use `window.addEventListener` to attach an event listener for any of the above events after the `deviceready` event fires.
+> To get a few ideas how to use the plugin, check out the [sample](#sample) at the bottom of this page or go straight to the [reference](#reference) content.
+
+Report issues with this plugin on the [Apache Cordova issue tracker][Apache Cordova issue tracker].
+
+##<a name="reference"></a>Reference
 
 ## Installation
 
-    cordova plugin add cordova-plugin-battery-status
+    cordova plugin add cordova-plugin-network-information
 
-## Status object
+## Supported Platforms
 
-All events in this plugin return an object with the following properties:
+- Android
+- Browser
+- iOS
+- Windows
 
-- __level__: The battery charge percentage (0-100). _(Number)_
-- __isPlugged__: A boolean that indicates whether the device is plugged in. _(Boolean)_
+# Connection
 
-## batterystatus event
+> The `connection` object, exposed via `navigator.connection`,  provides information about the device's cellular and wifi connection.
 
-Fires when the battery charge percentage changes by at least 1 percent, or when the device is plugged in or unplugged. Returns an [object][status_object] containing battery status.
+## Properties
 
-### Example
+- connection.type
 
-    window.addEventListener("batterystatus", onBatteryStatus, false);
+## Constants
 
-    function onBatteryStatus(status) {
-        console.log("Level: " + status.level + " isPlugged: " + status.isPlugged);
+- Connection.UNKNOWN
+- Connection.ETHERNET
+- Connection.WIFI
+- Connection.CELL_2G
+- Connection.CELL_3G
+- Connection.CELL_4G
+- Connection.CELL
+- Connection.NONE
+
+## connection.type
+
+This property offers a fast way to determine the device's network
+connection state, and type of connection.
+
+### Quick Example
+
+```js
+function checkConnection() {
+    var networkState = navigator.connection.type;
+
+    var states = {};
+    states[Connection.UNKNOWN]  = 'Unknown connection';
+    states[Connection.ETHERNET] = 'Ethernet connection';
+    states[Connection.WIFI]     = 'WiFi connection';
+    states[Connection.CELL_2G]  = 'Cell 2G connection';
+    states[Connection.CELL_3G]  = 'Cell 3G connection';
+    states[Connection.CELL_4G]  = 'Cell 4G connection';
+    states[Connection.CELL]     = 'Cell generic connection';
+    states[Connection.NONE]     = 'No network connection';
+
+    alert('Connection type: ' + states[networkState]);
+}
+
+checkConnection();
+```
+
+### API Change
+
+Until Cordova 2.3.0, the `Connection` object was accessed via
+`navigator.network.connection`, after which it was changed to
+`navigator.connection` to match the W3C specification.  It's still
+available at its original location, but is deprecated and will
+eventually be removed.
+
+### iOS Quirks
+
+- <iOS7 can't detect the type of cellular network connection.
+    - `navigator.connection.type` is set to `Connection.CELL` for all cellular data.
+
+### Windows Quirks
+
+- When running in the Phone 8.1 emulator, always detects `navigator.connection.type` as `Connection.ETHERNET`.
+
+### Browser Quirks
+
+- Browser can't detect the type of network connection.
+`navigator.connection.type` is always set to `Connection.UNKNOWN` when online.
+
+# Network-related Events
+
+## offline
+
+The event fires when an application goes offline, and the device is
+not connected to the Internet.
+
+    document.addEventListener("offline", yourCallbackFunction, false);
+
+### Details
+
+The `offline` event fires when a previously connected device loses a
+network connection so that an application can no longer access the
+Internet.  It relies on the same information as the Connection API,
+and fires when the value of `connection.type` becomes `NONE`.
+
+Applications typically should use `document.addEventListener` to
+attach an event listener once the `deviceready` event fires.
+
+### Quick Example
+
+```js
+document.addEventListener("offline", onOffline, false);
+
+function onOffline() {
+    // Handle the offline event
+}
+```
+
+### iOS Quirks
+
+During initial startup, the first offline event (if applicable) takes at least a second to fire.
+
+## online
+
+This event fires when an application goes online, and the device
+becomes connected to the Internet.
+
+    document.addEventListener("online", yourCallbackFunction, false);
+
+### Details
+
+The `online` event fires when a previously unconnected device receives
+a network connection to allow an application access to the Internet.
+It relies on the same information as the Connection API,
+and fires when the `connection.type` changes from `NONE` to any other
+value.
+
+Applications typically should use `document.addEventListener` to
+attach an event listener once the `deviceready` event fires.
+
+### Quick Example
+
+```js
+document.addEventListener("online", onOnline, false);
+
+function onOnline() {
+    // Handle the online event
+}
+```
+
+### iOS Quirks
+
+During initial startup, the first `online` event (if applicable) takes
+at least a second to fire, prior to which `connection.type` is
+`UNKNOWN`.
+
+## Sample: Upload a File Depending on your Network State <a name="sample"></a>
+
+The code examples in this section show examples of changing app behavior using the online and offline events and your network connection status.
+
+To start with, create a new FileEntry object (data.txt) to use for sample data. Call this function from the `deviceready` handler.
+
+>*Note* This code example requires the File plugin.
+
+```js
+var dataFileEntry;
+
+function createSomeData() {
+
+    window.requestFileSystem(window.TEMPORARY, 5 * 1024 * 1024, function (fs) {
+
+        console.log('file system open: ' + fs.name);
+        // Creates a new file or returns an existing file.
+        fs.root.getFile("data.txt", { create: true, exclusive: false }, function (fileEntry) {
+
+          dataFileEntry = fileEntry;
+
+        }, onErrorCreateFile);
+
+    }, onErrorLoadFs);
+}
+```
+
+Next, add listeners for the online and offline events in the `deviceready` handler.
+
+```js
+document.addEventListener("offline", onOffline, false);
+document.addEventListener("online", onOnline, false);
+```
+
+The app's `onOnline` function handles the online event. In the event handler, check the current network state. In this app, treat any connection type as good except Connection.NONE. If you have a connection, you try to upload a file.
+
+```js
+function onOnline() {
+    // Handle the online event
+    var networkState = navigator.connection.type;
+
+    if (networkState !== Connection.NONE) {
+        if (dataFileEntry) {
+            tryToUploadFile();
+        }
+    }
+    display('Connection type: ' + networkState);
+}
+```
+
+When the online event fires in the preceding code, call the app's `tryToUploadFile` function.
+
+If the FileTransfer object's upload function fails, call the app's `offlineWrite` function to save the current data somewhere.
+
+>*Note* This example requires the FileTransfer plugin.
+
+```js
+function tryToUploadFile() {
+    // !! Assumes variable fileURL contains a valid URL to a text file on the device,
+    var fileURL = getDataFileEntry().toURL();
+
+    var success = function (r) {
+        console.log("Response = " + r.response);
+        display("Uploaded. Response: " + r.response);
     }
 
-### Supported Platforms
-
-- iOS
-- Android
-- Windows
-- Browser (Chrome, Firefox, Opera)
-
-### Quirks: Android
-
-**Warning**: the Android implementation is greedy and prolonged use will drain the device's battery.
-
-## batterylow event
-
-Fires when the battery charge percentage reaches the low charge threshold. This threshold value is device-specific. Returns an [object][status_object] containing battery status.
-
-### Example
-
-    window.addEventListener("batterylow", onBatteryLow, false);
-
-    function onBatteryLow(status) {
-        alert("Battery Level Low " + status.level + "%");
+    var fail = function (error) {
+        console.log("An error has occurred: Code = " + error.code);
+        offlineWrite("Failed to upload: some offline data");
     }
 
-### Supported Platforms
+    var options = new FileUploadOptions();
+    options.fileKey = "file";
+    options.fileName = fileURL.substr(fileURL.lastIndexOf('/') + 1);
+    options.mimeType = "text/plain";
 
-- iOS
-- Android
-- Windows
-- Browser (Chrome, Firefox, Opera)
+    var ft = new FileTransfer();
+    // Make sure you add the domain of your server URL to the
+    // Content-Security-Policy <meta> element in index.html.
+    ft.upload(fileURL, encodeURI(SERVER), success, fail, options);
+};
+```
 
-## batterycritical event
+Here is the code for the `offlineWrite` function.
 
-Fires when the battery charge percentage reaches the critical charge threshold. This threshold value is device-specific. Returns an [object][status_object] containing battery status.
+>*Note* This code examples requires the File plugin.
 
-### Example
+```js
+function offlineWrite(offlineData) {
+    // Create a FileWriter object for our FileEntry.
+    dataFileEntry.createWriter(function (fileWriter) {
 
-    window.addEventListener("batterycritical", onBatteryCritical, false);
+        fileWriter.onwriteend = function () {
+            console.log("Successful file write...");
+            display(offlineData);
+        };
 
-    function onBatteryCritical(status) {
-        alert("Battery Level Critical " + status.level + "%\nRecharge Soon!");
-    }
+        fileWriter.onerror = function (e) {
+            console.log("Failed file write: " + e.toString());
+        };
 
-### Supported Platforms
+        fileWriter.write(offlineData);
+    });
+}
+```
 
-- iOS
-- Android
-- Windows
-- Browser (Chrome, Firefox, Opera)
+If the offline event occurs, just do something like notify the user (for this example, just log it).
 
-
-[w3c_spec]: http://www.w3.org/TR/2011/WD-battery-status-20110915/
-[status_object]: #status-object
+```js
+function onOffline() {
+    // Handle the offline event
+    console.log("lost connection");
+}
+```
+ 
+[Apache Cordova issue tracker]: https://issues.apache.org/jira/issues/?jql=project%20%3D%20CB%20AND%20status%20in%20%28Open%2C%20%22In%20Progress%22%2C%20Reopened%29%20AND%20resolution%20%3D%20Unresolved%20AND%20component%20%3D%20%22Plugin%20Network%20Information%22%20ORDER%20BY%20priority%20DESC%2C%20summary%20ASC%2C%20updatedDate%20DESC

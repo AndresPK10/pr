@@ -17,135 +17,172 @@
 #         under the License.
 -->
 
-# Cordova-plugin-batterie-statut
+# cordova-plugin-network-information
 
-[![Build Status](https://travis-ci.org/apache/cordova-plugin-battery-status.svg)](https://travis-ci.org/apache/cordova-plugin-battery-status)
+[![Build Status](https://travis-ci.org/apache/cordova-plugin-network-information.svg)](https://travis-ci.org/apache/cordova-plugin-network-information)
 
-Ce plugin fournit une implémentation d'une ancienne version de [Batterie Status événements API](http://www.w3.org/TR/2011/WD-battery-status-20110915/).
-
-Il ajoute les trois `window` des événements :
-
-  * batterystatus
-  * batterycritical
-  * batterylow
+Ce plugin fournit une implémentation d'une ancienne version de l' [API Information Network](http://www.w3.org/TR/2011/WD-netinfo-api-20110607/). Il fournit des informations sur l'appareil cellulaire et connexion wifi, et si l'appareil dispose d'une connexion internet.
 
 ## Installation
 
-    cordova plugin add cordova-plugin-battery-status
+    cordova plugin add cordova-plugin-network-information
     
 
-## batterystatus
-
-L'évènement se déclenche lorsque le taux de charge de la batterie gagne ou perd au moins un pourcent, ou quand l'appareil est branché ou débranché.
-
-Le gestionnaire est appelé avec un objet contenant deux propriétés :
-
-  * **level** : le taux de charge de la batterie (0-100). *(Number)*
-
-  * **isPlugged** : un booléen indiquant si l'appareil est en cours de chargement ou non. *(Boolean)*
-
-Les applications doivent généralement utiliser `window.addEventListener` pour attacher un écouteur d'événements après le `deviceready` événement se déclenche.
-
-### Plates-formes supportées
+## Plates-formes supportées
 
   * Amazon Fire OS
-  * iOS
   * Android
   * BlackBerry 10
+  * Navigateur
+  * iOS
   * Windows Phone 7 et 8
-  * Windows (Windows Phone 8.1 uniquement)
   * Paciarelli
+  * Windows
   * Firefox OS
 
-### Android et Amazon Fire OS bizarreries
+# Connexion
 
-  * AVERTISSEMENT : l'Android + feu OS implémentations sont avides et utilisation prolongée s'évacuera pile de l'utilisateur. 
+> L'objet `connection`, disponible via `navigator.connection`, fournit des informations sur la connection cellulaire/wifi de l'appareil.
 
-### Notes au sujet de Windows Phone 7 et 8
+## Propriétés
 
-Windows Phone 7 ne fournit pas d'API native pour déterminer le niveau de la batterie, de ce fait la propriété `level` n'est pas disponible. La propriété `isPlugged` *est* quant à elle prise en charge.
+  * connection.type
+
+## Constantes
+
+  * Connection.UNKNOWN
+  * Connection.ETHERNET
+  * Connection.WIFI
+  * Connection.CELL_2G
+  * Connection.CELL_3G
+  * Connection.CELL_4G
+  * Connection.CELL
+  * Connection.NONE
+
+## connection.type
+
+Cette propriété offre un moyen rapide pour déterminer l'état et le type de la connexion réseau de l'appareil.
+
+### Exemple court
+
+    function checkConnection() {
+        var networkState = navigator.connection.type;
+    
+        var states = {};
+        states[Connection.UNKNOWN]  = 'Unknown connection';
+        states[Connection.ETHERNET] = 'Ethernet connection';
+        states[Connection.WIFI]     = 'WiFi connection';
+        states[Connection.CELL_2G]  = 'Cell 2G connection';
+        states[Connection.CELL_3G]  = 'Cell 3G connection';
+        states[Connection.CELL_4G]  = 'Cell 4G connection';
+        states[Connection.CELL]     = 'Cell generic connection';
+        states[Connection.NONE]     = 'No network connection';
+    
+        alert('Connection type: ' + states[networkState]);
+    }
+    
+    checkConnection();
+    
+
+### Changement d'API
+
+Jusqu'à Cordova 2.3.0, l'objet `Connection` était accessible via `navigator.network.connection` ; ceci a été changé pour `navigator.connection` afin de concorder avec la spécification du W3C. L'accès est toujours possible à l'emplacement d'origine, mais est considéré comme obsolète et sera bientôt supprimé.
+
+### Notes au sujet d'iOS
+
+  * iOS ne peut pas détecter le type de connexion au réseau cellulaire. 
+      * `navigator.connection.type`a la valeur `Connection.CELL` pour toutes les données cellulaires.
+
+### Windows Phone Quirks
+
+  * Lors de l'exécution dans l'émulateur, détecte toujours `navigator.connection.type` comme`Connection.UNKNOWN`.
+
+  * Windows Phone ne peut pas détecter le type de connexion au réseau cellulaire.
+    
+      * `navigator.connection.type`a la valeur `Connection.CELL` pour toutes les données cellulaires.
 
 ### Bizarreries de Windows
 
-8.1 de Windows Phone ne prend pas de paramètre `isPlugged` . Le `level` paramètre *is* pris en charge.
+  * Lors de l'exécution dans l'émulateur de téléphone 8.1, `Connection.ETHERNET` détecte toujours `navigator.connection.type`.
 
-### Exemple
+### Bizarreries de paciarelli
 
-    window.addEventListener("batterystatus", onBatteryStatus, false);
+  * Paciarelli ne peut détecter une connexion cellulaire ou le WiFi. 
+      * `navigator.connection.type` a la valeur `Connection.CELL_2G` pour toutes les données cellulaires.
+
+### Firefox OS Quirks
+
+  * Firefox OS ne peut pas détecter le type de connexion au réseau cellulaire. 
+      * `navigator.connection.type`a la valeur `Connection.CELL` pour toutes les données cellulaires.
+
+### Bizarreries navigateur
+
+  * Navigateur ne peut pas détecter le type de connexion réseau. `navigator.connection.type` est toujours définie sur `Connection.UNKNOWN` en ligne.
+
+# Événements liés au réseau
+
+## offline
+
+L'évènement se déclenche lorsqu'une application se déconnecte, quand l'appareil n'est pas connecté à Internet.
+
+    document.addEventListener("offline", yourCallbackFunction, false);
     
-    function onBatteryStatus(info) {
+
+### Détails
+
+L'évènement `offline` se déclenche lorsqu'un appareil précédemment connecté perd sa connexion au réseau, empêchant ainsi l'application d'accéder à Internet. Il s'appuie sur les mêmes informations que l'API de connexion et se déclenche lorsque la valeur de `connection.type` devient`NONE`.
+
+Les applications devraient en général utiliser `document.addEventListener` pour attacher un écouteur d'évènements, une fois l'évènement `deviceready` déclenché.
+
+### Exemple court
+
+    document.addEventListener (« hors ligne », onOffline, false) ;
+    
+    function onOffline() {/ / gestion de l'événement en mode hors connexion}
+    
+
+### Notes au sujet d'iOS
+
+Lors du démarrage initial, le déclenchement du premier évènement offline (si applicable) prend au moins une seconde.
+
+### Windows Phone 7 Quirks
+
+Lors de l'exécution dans l'émulateur, le `connection.status` est toujours inconnu, ainsi cet événement ne fait *pas* de feu.
+
+### Notes au sujet de Windows Phone 8
+
+L'émulateur signale le type de connexion comme `Cellular`, type qui ne change jamais, ainsi l'évènement n'est *pas* déclenché.
+
+## online
+
+L'évènement se déclenche lorsqu'une application se connecte, quand l'appareil est connecté à Internet.
+
+    document.addEventListener("online", yourCallbackFunction, false);
+    
+
+### Détails
+
+L'évènement `online` se déclenche lorsqu'un appareil précédemment non-connecté se connecte au réseau, permettant ainsi à l'application d'accéder à Internet. Il s'appuie sur les mêmes informations que l'API de connexion et se déclenche quand le `connection.type` passe de `NONE` à une autre valeur.
+
+Les applications devraient en général utiliser `document.addEventListener` pour attacher un écouteur d'évènements, une fois l'évènement `deviceready` déclenché.
+
+### Exemple court
+
+    document.addEventListener("online", onOnline, false);
+    
+    function onOnline() {
         // Handle the online event
-        console.log("Level: " + info.level + " isPlugged: " + info.isPlugged);
     }
     
 
-## batterycritical
+### Notes au sujet d'iOS
 
-L'évènement se déclenche lorsque le pourcentage de charge de la batterie a atteint un seuil critique. Cette valeur est spécifique à l'appareil.
+Lors du démarrage initial, le déclenchement du premier évènement `online` (si applicable) prend au moins une seconde avant quoi `connection.type` vaut `UNKNOWN`.
 
-Le gestionnaire `batterycritical` est appelé avec un objet contenant deux propriétés :
+### Windows Phone 7 Quirks
 
-  * **level** : le taux de charge de la batterie (0-100). *(Number)*
+Lors de l'exécution dans l'émulateur, le `connection.status` est toujours inconnu, ainsi cet événement ne fait *pas* de feu.
 
-  * **isPlugged** : un booléen indiquant si l'appareil est en cours de chargement ou non. *(Boolean)*
+### Notes au sujet de Windows Phone 8
 
-Les applications devraient en général utiliser `window.addEventListener` pour attacher un écouteur d'évènements, une fois l'évènement `deviceready` déclenché.
-
-### Plates-formes supportées
-
-  * Amazon Fire OS
-  * iOS
-  * Android
-  * BlackBerry 10
-  * Paciarelli
-  * Firefox OS
-  * Windows (Windows Phone 8.1 uniquement)
-
-### Bizarreries de Windows
-
-Windows Phone 8.1 tirera `batterycritical` épreuve que l'État branché car il n'est pas supportée.
-
-### Exemple
-
-    window.addEventListener("batterycritical", onBatteryCritical, false);
-    
-    function onBatteryCritical(info) {
-        // Handle the battery critical event
-        alert("Battery Level Critical " + info.level + "%\nRecharge Soon!");
-    }
-    
-
-## batterylow
-
-L'évènement se déclenche lorsque le pourcentage de charge de la batterie a atteint un niveau faible, cette valeur est spécifique à l'appareil.
-
-Le gestionnaire `batterylow` est appelé avec un objet contenant deux propriétés :
-
-  * **level** : le taux de charge de la batterie (0-100). *(Number)*
-
-  * **isPlugged** : un booléen indiquant si l'appareil est en cours de chargement ou non. *(Boolean)*
-
-Les applications devraient en général utiliser `window.addEventListener` pour attacher un écouteur d'évènements, une fois l'évènement `deviceready` déclenché.
-
-### Plates-formes supportées
-
-  * Amazon Fire OS
-  * iOS
-  * Android
-  * BlackBerry 10
-  * Paciarelli
-  * Firefox OS
-  * Windows (Windows Phone 8.1 uniquement)
-
-### Bizarreries de Windows
-
-Windows Phone 8.1 tirera `batterylow` épreuve que l'État branché car il n'est pas supportée.
-
-### Exemple
-
-    window.addEventListener("batterylow", onBatteryLow, false);
-    
-    function onBatteryLow(info) {
-        // Handle the battery low event
-        alert("Battery Level Low " + info.level + "%");
-    }
+L'émulateur signale le type de connexion comme `Cellular` , qui ne change pas, aussi des événements ne fait *pas* de feu.

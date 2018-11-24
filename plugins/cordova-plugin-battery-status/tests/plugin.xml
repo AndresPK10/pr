@@ -19,11 +19,10 @@
 -->
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-    xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    id="cordova-plugin-battery-status-tests"
-    version="2.0.2">
-    <name>Cordova Battery Plugin Tests</name>
+    id="cordova-plugin-network-information-tests"
+    version="2.0.1">
+    <name>Cordova Network Information Plugin Tests</name>
     <license>Apache 2.0</license>
 
     <js-module src="tests.js" name="tests">

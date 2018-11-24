@@ -1,16 +1,16 @@
 {
-  "_from": "cordova-plugin-battery-status",
-  "_id": "cordova-plugin-battery-status@2.0.2",
+  "_from": "cordova-plugin-network-information",
+  "_id": "cordova-plugin-network-information@2.0.1",
   "_inBundle": false,
-  "_integrity": "sha1-OqGR97y2/Hz8nd/t9h5rSgWy31U=",
-  "_location": "/cordova-plugin-battery-status",
+  "_integrity": "sha1-6QQh9DDGq3bUCSI/Jfzvu7zhdpA=",
+  "_location": "/cordova-plugin-network-information",
   "_phantomChildren": {},
   "_requested": {
     "type": "tag",
     "registry": true,
-    "raw": "cordova-plugin-battery-status",
-    "name": "cordova-plugin-battery-status",
-    "escapedName": "cordova-plugin-battery-status",
+    "raw": "cordova-plugin-network-information",
+    "name": "cordova-plugin-network-information",
+    "escapedName": "cordova-plugin-network-information",
     "rawSpec": "",
     "saveSpec": null,
     "fetchSpec": "latest"
@@ -19,9 +19,9 @@
     "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/cordova-plugin-battery-status/-/cordova-plugin-battery-status-2.0.2.tgz",
-  "_shasum": "3aa191f7bcb6fc7cfc9ddfedf61e6b4a05b2df55",
-  "_spec": "cordova-plugin-battery-status",
+  "_resolved": "https://registry.npmjs.org/cordova-plugin-network-information/-/cordova-plugin-network-information-2.0.1.tgz",
+  "_shasum": "e90421f430c6ab76d409223f25fcefbbbce17690",
+  "_spec": "cordova-plugin-network-information",
   "_where": "C:\\Users\\ANDRES\\Documents\\prueba8\\hello",
   "author": {
     "name": "Apache Software Foundation"
@@ -31,25 +31,24 @@
   },
   "bundleDependencies": false,
   "cordova": {
-    "id": "cordova-plugin-battery-status",
+    "id": "cordova-plugin-network-information",
     "platforms": [
       "android",
       "ios",
-      "browser",
-      "windows"
+      "windows",
+      "browser"
     ]
   },
   "deprecated": false,
-  "description": "Cordova Battery Plugin",
+  "description": "Cordova Network Information Plugin",
   "devDependencies": {
-    "eslint": "^3.19.0",
+    "eslint": "^4.0.0",
     "eslint-config-semistandard": "^11.0.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.3.0",
     "eslint-plugin-node": "^5.0.0",
     "eslint-plugin-promise": "^3.5.0",
-    "eslint-plugin-standard": "^3.0.1",
-    "jshint": "^2.6.0"
+    "eslint-plugin-standard": "^3.0.1"
   },
   "engines": {
     "cordovaDependencies": {
@@ -58,24 +57,27 @@
       }
     }
   },
-  "homepage": "https://github.com/apache/cordova-plugin-battery-status#readme",
+  "homepage": "https://github.com/apache/cordova-plugin-network-information#readme",
   "keywords": [
     "cordova",
-    "battery",
+    "network",
+    "information",
     "ecosystem:cordova",
     "cordova-android",
-    "cordova-ios"
+    "cordova-ios",
+    "cordova-windows",
+    "cordova-browser"
   ],
   "license": "Apache-2.0",
-  "name": "cordova-plugin-battery-status",
+  "name": "cordova-plugin-network-information",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/apache/cordova-plugin-battery-status.git"
+    "url": "git+https://github.com/apache/cordova-plugin-network-information.git"
   },
   "scripts": {
-    "eslint": "node node_modules/eslint/bin/eslint www && node node_modules/eslint/bin/eslint src && node node_modules/eslint/bin/eslint tests",
+    "eslint": "eslint www && eslint src && eslint tests",
     "test": "npm run eslint"
   },
   "types": "./types/index.d.ts",
-  "version": "2.0.2"
+  "version": "2.0.1"
 }

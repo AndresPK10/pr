@@ -17,135 +17,174 @@
 #         under the License.
 -->
 
-# cordova-plugin-battery-status
+# cordova-plugin-network-information
 
-[![Build Status](https://travis-ci.org/apache/cordova-plugin-battery-status.svg)](https://travis-ci.org/apache/cordova-plugin-battery-status)
+[![Build Status](https://travis-ci.org/apache/cordova-plugin-network-information.svg)](https://travis-ci.org/apache/cordova-plugin-network-information)
 
-Wtyczka stanowi implementację starą wersję [API zdarzeń stanu baterii](http://www.w3.org/TR/2011/WD-battery-status-20110915/).
-
-To dodaje następujące trzy `window` zdarzenia:
-
-  * batterystatus
-  * batterycritical
-  * batterylow
+Wtyczka stanowi implementację starą wersję [API informacji w sieci](http://www.w3.org/TR/2011/WD-netinfo-api-20110607/). Udostępnia informacje na temat urządzenia komórkowe i wifi połączenie, i czy urządzenie ma połączenie z Internetem.
 
 ## Instalacja
 
-    cordova plugin add cordova-plugin-battery-status
+    cordova plugin add cordova-plugin-network-information
     
 
-## batterystatus
-
-To zdarzenie fires po zmianie procent naładowania baterii, przez co najmniej 1 procent, lub jeśli urządzenie jest podłączone lub odłączony.
-
-Obsługi stan baterii jest przekazywany obiekt, który zawiera dwie właściwości:
-
-  * **poziom**: procent naładowania baterii (0-100). *(Liczba)*
-
-  * **isPlugged**: boolean, która wskazuje, czy urządzenie jest podłączony *(Boolean)*
-
-Aplikacje zwykle należy użyć `window.addEventListener` Aby dołączyć słuchacza po `deviceready` pożary zdarzenia.
-
-### Obsługiwane platformy
+## Obsługiwane platformy
 
   * Amazon Fire OS
-  * iOS
   * Android
   * BlackBerry 10
+  * Przeglądarka
+  * iOS
   * Windows Phone 7 i 8
-  * Windows (tylko Windows Phone 8.1)
   * Tizen
+  * Windows
   * Firefox OS
 
-### Android i Amazon ogień OS dziwactwa
+# Połączenie
 
-  * Ostrzeżenie: Android + ogień OS implementacje są chciwi i długotrwałe stosowanie drenażu użytkownika baterii. 
+> `connection`Obiektu, wystawiony przez `navigator.connection` , zawiera informacje o połączeniu urządzenia komórkowe i wifi.
 
-### Windows Phone 7 i 8 dziwactwa
+## Właściwości
 
-Windows Phone 7 nie zapewniają native API do określenia poziomu baterii, więc `level` Właściwość jest niedostępny. `isPlugged`Parametr *jest* obsługiwany.
+  * Connection.Type
+
+## Stałe
+
+  * Connection.UNKNOWN
+  * Connection.ETHERNET
+  * Connection.WIFI
+  * Connection.CELL_2G
+  * Connection.CELL_3G
+  * Connection.CELL_4G
+  * Connection.CELL
+  * Connection.NONE
+
+## Connection.Type
+
+Oferuje szybki sposób ustalić stan połączenia sieciowego urządzenia i typ połączenia.
+
+### Szybki przykład
+
+    function checkConnection() {
+        var networkState = navigator.connection.type;
+    
+        var states = {};
+        states[Connection.UNKNOWN]  = 'Unknown connection';
+        states[Connection.ETHERNET] = 'Ethernet connection';
+        states[Connection.WIFI]     = 'WiFi connection';
+        states[Connection.CELL_2G]  = 'Cell 2G connection';
+        states[Connection.CELL_3G]  = 'Cell 3G connection';
+        states[Connection.CELL_4G]  = 'Cell 4G connection';
+        states[Connection.CELL]     = 'Cell generic connection';
+        states[Connection.NONE]     = 'No network connection';
+    
+        alert('Connection type: ' + states[networkState]);
+    }
+    
+    checkConnection();
+    
+
+### Zmiana interfejsu API
+
+Do Cordova 2.3.0 `Connection` obiekt uzyskano za pośrednictwem `navigator.network.connection` , po którym został zmieniony na `navigator.connection` odpowiadać specyfikacji W3C. To jest nadal dostępne w jego oryginalnej lokalizacji, ale jest niezalecane i zostaną ostatecznie usunięte.
+
+### Dziwactwa iOS
+
+  * iOS nie może wykryć typ połączenia w sieci komórkowej. 
+      * `navigator.connection.type`jest zestaw `Connection.CELL` dla wszystkich komórek danych.
+
+### Windows Phone dziwactwa
+
+  * Po uruchomieniu w emulatorze, zawsze wykrywa `navigator.connection.type` jako`Connection.UNKNOWN`.
+
+  * Windows Phone nie może wykryć typ połączenia w sieci komórkowej.
+    
+      * `navigator.connection.type`jest zestaw `Connection.CELL` dla wszystkich komórek danych.
 
 ### Windows dziwactwa
 
-Windows Phone 8.1 obsługuje parametr `isPlugged` . `Parametr <em>jest</em> obsługiwany.`
+  * Po uruchomieniu w emulatorze telefonu 8.1, zawsze wykrywa `navigator.connection.type` jako `Connection.ETHERNET`.
 
-### Przykład
+### Dziwactwa Tizen
 
-    window.addEventListener("batterystatus", onBatteryStatus, false);
+  * Tizen można tylko dostrzegać Wi-Fi lub połączenia komórkowe. 
+      * `Navigator.Connection.Type` jest zestaw do `Connection.CELL_2G` dla wszystkich komórek danych.
+
+### Firefox OS dziwactwa
+
+  * Firefox OS nie można wykryć typ połączenia w sieci komórkowej. 
+      * `navigator.connection.type`jest zestaw `Connection.CELL` dla wszystkich komórek danych.
+
+### Quirks przeglądarki
+
+  * Przeglądarka nie może wykryć typ połączenia sieciowego. `Navigator.Connection.Type` jest zawsze zestaw do `Connection.UNKNOWN` podczas online.
+
+# Zdarzenia związane z sieci
+
+## offline
+
+Zdarzenie odpala gdy aplikacja przejdzie do trybu offline, a urządzenie nie jest podłączone do Internetu.
+
+    document.addEventListener("offline", yourCallbackFunction, false);
     
-    function onBatteryStatus(info) {
+
+### Szczegóły
+
+`offline`Zdarzenie fires po wcześniej podłączone urządzenie traci połączenia z siecią, dzięki czemu aplikacja może już dostęp do Internetu. Opiera się na te same informacje połączenia API i gdy odpalam wartość `connection.type` staje się`NONE`.
+
+Aplikacje zwykle należy użyć `document.addEventListener` Aby dołączyć słuchacza raz `deviceready` pożary zdarzenia.
+
+### Szybki przykład
+
+    document.addEventListener("offline", onOffline, false);
+    
+    function onOffline() {
+        // Handle the offline event
+    }
+    
+
+### Dziwactwa iOS
+
+Podczas uruchamiania systemu pierwsza impreza offline (jeśli dotyczy) trwa co najmniej drugi ognia.
+
+### Dziwactwa Windows Phone 7
+
+Po uruchomieniu w emulatorze, `connection.status` zawsze jest nieznana, więc to wydarzenie *nie* ogień.
+
+### Windows Phone 8 dziwactwa
+
+Emulator raporty typ połączenia, jako `Cellular` , co nie zmienia, więc zdarzenie *nie* ogień.
+
+## online
+
+Wydarzenie to odpala gdy aplikacja przechodzi w tryb online i urządzenie staje się połączenie z Internetem.
+
+    document.addEventListener("online", yourCallbackFunction, false);
+    
+
+### Szczegóły
+
+`online`Zdarzenie odpala gdy wcześniej niezwiązane urządzenie odbiera połączenie sieciowe, aby umożliwić aplikacji dostęp do Internetu. Opiera się na te same informacje połączenia API i gdy odpalam `connection.type` zmienia się z `NONE` na inną wartość.
+
+Aplikacje zwykle należy użyć `document.addEventListener` Aby dołączyć słuchacza raz `deviceready` pożary zdarzenia.
+
+### Szybki przykład
+
+    document.addEventListener("online", onOnline, false);
+    
+    function onOnline() {
         // Handle the online event
-        console.log("Level: " + info.level + " isPlugged: " + info.isPlugged);
     }
     
 
-## batterycritical
+### Dziwactwa iOS
 
-Zdarzenie odpala gdy procent naładowania baterii osiągnie próg rozładowanej baterii. Wartość jest specyficzne dla urządzenia.
+Podczas uruchamiania systemu pierwszy `online` zdarzenia (w stosownych przypadkach) zajmuje co najmniej drugie ognia, przed którym `connection.type` jest`UNKNOWN`.
 
-`batterycritical`Obsługi jest przekazywany obiekt, który zawiera dwie właściwości:
+### Dziwactwa Windows Phone 7
 
-  * **poziom**: procent naładowania baterii (0-100). *(Liczba)*
+Po uruchomieniu w emulatorze, `connection.status` zawsze jest nieznana, więc to wydarzenie *nie* ogień.
 
-  * **isPlugged**: boolean, która wskazuje, czy urządzenie jest podłączony *(Boolean)*
+### Windows Phone 8 dziwactwa
 
-Aplikacje zwykle należy użyć `window.addEventListener` Aby dołączyć słuchacza raz `deviceready` pożary zdarzenia.
-
-### Obsługiwane platformy
-
-  * Amazon Fire OS
-  * iOS
-  * Android
-  * BlackBerry 10
-  * Tizen
-  * Firefox OS
-  * Windows (tylko Windows Phone 8.1)
-
-### Windows dziwactwa
-
-Windows Phone 8.1 będzie ogień `batterycritical` imprezy niezależnie od stanu podłączony, jak nie jest obsługiwany.
-
-### Przykład
-
-    window.addEventListener("batterycritical", onBatteryCritical, false);
-    
-    function onBatteryCritical(info) {
-        // Handle the battery critical event
-        alert("Battery Level Critical " + info.level + "%\nRecharge Soon!");
-    }
-    
-
-## batterylow
-
-Zdarzenie odpala gdy procent naładowania baterii osiągnie próg niskiego poziomu baterii, wartości specyficzne dla urządzenia.
-
-`batterylow`Obsługi jest przekazywany obiekt, który zawiera dwie właściwości:
-
-  * **poziom**: procent naładowania baterii (0-100). *(Liczba)*
-
-  * **isPlugged**: boolean, która wskazuje, czy urządzenie jest podłączony *(Boolean)*
-
-Aplikacje zwykle należy użyć `window.addEventListener` Aby dołączyć słuchacza raz `deviceready` pożary zdarzenia.
-
-### Obsługiwane platformy
-
-  * Amazon Fire OS
-  * iOS
-  * Android
-  * BlackBerry 10
-  * Tizen
-  * Firefox OS
-  * Windows (tylko Windows Phone 8.1)
-
-### Windows dziwactwa
-
-Windows Phone 8.1 będzie ogień `batterylow` imprezy niezależnie od stanu podłączony, jak nie jest obsługiwany.
-
-### Przykład
-
-    window.addEventListener("batterylow", onBatteryLow, false);
-    
-    function onBatteryLow(info) {
-        // Handle the battery low event
-        alert("Battery Level Low " + info.level + "%");
-    }
+Emulator sprawozdania jako typ połączenia `Cellular` , które nie zmienia, więc wydarzenia czy *nie* ogień.

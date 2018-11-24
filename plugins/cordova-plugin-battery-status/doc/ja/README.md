@@ -17,135 +17,174 @@
 #         under the License.
 -->
 
-# cordova-plugin-battery-status
+# cordova-plugin-network-information
 
-[![Build Status](https://travis-ci.org/apache/cordova-plugin-battery-status.svg)](https://travis-ci.org/apache/cordova-plugin-battery-status)
+[![Build Status](https://travis-ci.org/apache/cordova-plugin-network-information.svg)](https://travis-ci.org/apache/cordova-plugin-network-information)
 
-このプラグインは、[バッテリ ステータス イベント API](http://www.w3.org/TR/2011/WD-battery-status-20110915/)の旧バージョンの実装を提供します.
-
-次の 3 つを追加します `window` イベント。
-
-  * batterystatus
-  * batterycritical
-  * batterylow
+このプラグインは、古いバージョンの[ネットワーク情報 API](http://www.w3.org/TR/2011/WD-netinfo-api-20110607/)の実装を提供します。 デバイスの携帯電話や wifi 接続に関する情報を提供し、かどうか、デバイスがインターネットに接続します。
 
 ## インストール
 
-    cordova plugin add cordova-plugin-battery-status
+    cordova plugin add cordova-plugin-network-information
     
 
-## batterystatus
-
-バッテリーの充電の割合 1% 以上によって変更されたとき、またはデバイス接続している場合に発生します。
-
-バッテリ状態ハンドラーは 2 つのプロパティを格納しているオブジェクトに渡されます。
-
-  * **レベル**： バッテリーの充電量 （0-100) の割合。*(数)*
-
-  * **起こしたり**： デバイスが接続されてインチ*(ブール値)*かどうかを示すブール値
-
-通常アプリケーションに使用する必要があります `window.addEventListener` 後のイベント リスナーをアタッチする、 `deviceready` イベントが発生します。
-
-### サポートされているプラットフォーム
+## サポートされているプラットフォーム
 
   * アマゾン火 OS
-  * iOS
   * アンドロイド
   * ブラックベリー 10
+  * ブラウザー
+  * iOS
   * Windows Phone 7 と 8
-  * Windows (Windows Phone 8.1 のみ)
   * Tizen
+  * Windows
   * Firefox の OS
 
-### アンドロイドとアマゾン火 OS 癖
+# Connection
 
-  * 警告: Android + 火 OS 実装は欲張りな長期使用ユーザーのバッテリーを排出するでしょう。 
+> `connection`オブジェクトによって公開されて `navigator.connection` 、デバイスの携帯電話や wifi 接続に関する情報を提供します。
 
-### Windows Phone 7 と 8 癖
+## プロパティ
 
-Windows Phone 7 は、バッテリーのレベルを決定するネイティブ Api を提供しませんので、 `level` プロパティは使用できません。`isPlugged`パラメーター*が*サポートされています。
+  * connection.type
+
+## 定数
+
+  * Connection.UNKNOWN
+  * Connection.ETHERNET
+  * Connection.WIFI
+  * Connection.CELL_2G
+  * Connection.CELL_3G
+  * Connection.CELL_4G
+  * Connection.CELL
+  * Connection.NONE
+
+## connection.type
+
+このプロパティはデバイスのネットワーク接続状態を確認する速い方法を提供し、接続の種類。
+
+### 簡単な例
+
+    function checkConnection() {
+        var networkState = navigator.connection.type;
+    
+        var states = {};
+        states[Connection.UNKNOWN]  = 'Unknown connection';
+        states[Connection.ETHERNET] = 'Ethernet connection';
+        states[Connection.WIFI]     = 'WiFi connection';
+        states[Connection.CELL_2G]  = 'Cell 2G connection';
+        states[Connection.CELL_3G]  = 'Cell 3G connection';
+        states[Connection.CELL_4G]  = 'Cell 4G connection';
+        states[Connection.CELL]     = 'Cell generic connection';
+        states[Connection.NONE]     = 'No network connection';
+    
+        alert('Connection type: ' + states[networkState]);
+    }
+    
+    checkConnection();
+    
+
+### API の変更
+
+コルドバ 2.3.0、まで、 `Connection` 経由でアクセスされたオブジェクトが `navigator.network.connection` 、それに変更されましたが後 `navigator.connection` W3C の仕様に一致します。 それはまだ元の場所は廃止され、最終的に削除されます。
+
+### iOS の癖
+
+  * iOS は、携帯電話のネットワーク接続の種類を検出できません。 
+      * `navigator.connection.type`設定する `Connection.CELL` すべての携帯電話データの。
+
+### Windows Phone の癖
+
+  * エミュレーターで実行しているときを常に検出 `navigator.connection.type` として`Connection.UNKNOWN`.
+
+  * Windows Phone 携帯電話ネットワーク接続の種類を検出できません。
+    
+      * `navigator.connection.type`設定する `Connection.CELL` すべての携帯電話データの。
 
 ### Windows の癖
 
-Windows Phone 8.1`isPlugged`パラメーターをサポートしていません。 `level`のパラメーター*is*サポートされています。
+  * 電話 8.1 エミュレーターで実行する場合は、常に `Connection.ETHERNET` として `navigator.connection.type` を検出します.
 
-### 例
+### Tizen の癖
 
-    window.addEventListener("batterystatus", onBatteryStatus, false);
+  * Tizen には、WiFi または携帯電話の接続だけを検出できます。 
+      * `navigator.connection.type` は、すべての携帯電話のデータを `Connection.CELL_2G` に設定されます。
+
+### Firefox OS 癖
+
+  * Firefox の OS は、携帯電話のネットワーク接続の種類を検出できません。 
+      * `navigator.connection.type`設定する `Connection.CELL` すべての携帯電話データの。
+
+### ブラウザーの癖
+
+  * ブラウザーは、ネットワーク接続の種類を検出できません。 `navigator.connection.type`は、 `Connection.UNKNOWN`オンライン時に常に設定されます。
+
+# ネットワーク関連のイベント
+
+## offline
+
+アプリケーションがオフラインになり、デバイスがインターネットに接続されていないときに発生します。
+
+    document.addEventListener("offline", yourCallbackFunction, false);
     
-    function onBatteryStatus(info) {
+
+### 詳細
+
+`offline`アプリケーションはもはや、インターネットにアクセスできるように、以前接続されたデバイスは、ネットワーク接続が失われたときに発生します。 接続 API と同じ情報に依存しており、火災時の値 `connection.type` になります。`NONE`.
+
+通常アプリケーションに使用する必要があります `document.addEventListener` 一度のイベント リスナーをアタッチし、 `deviceready` イベントが発生します。
+
+### 簡単な例
+
+    document.addEventListener("offline", onOffline, false);
+    
+    function onOffline() {
+        // Handle the offline event
+    }
+    
+
+### iOS の癖
+
+初回起動時 (当てはまる場合) の最初のオフライン イベントは火に 1 秒以上かかります。
+
+### Windows Phone 7 の癖
+
+エミュレーターで実行しているとき、 `connection.status` は常に知られている、このイベントは*ない*火。
+
+### Windows Phone 8 癖
+
+エミュレーターと接続の種類のレポート `Cellular` は変化しません、イベントは*ない*火。
+
+## online
+
+アプリケーションは、オンラインになるし、デバイスがインターネットに接続するときに発生します。
+
+    document.addEventListener("online", yourCallbackFunction, false);
+    
+
+### 詳細
+
+`online`以前接続されていないデバイスが、インターネットへのアプリケーション アクセスを許可するネットワーク接続を受信するときに発生します。 接続 API と同じ情報に依存しており、場合に適用されます、 `connection.type` から変更 `NONE` 以外の値にします。
+
+通常アプリケーションに使用する必要があります `document.addEventListener` 一度のイベント リスナーをアタッチし、 `deviceready` イベントが発生します。
+
+### 簡単な例
+
+    document.addEventListener("online", onOnline, false);
+    
+    function onOnline() {
         // Handle the online event
-        console.log("Level: " + info.level + " isPlugged: " + info.isPlugged);
     }
     
 
-## batterycritical
+### iOS の癖
 
-バッテリーの充電の割合がバッテリ切れのしきい値に達したときに発生します。値は、デバイス固有です。
+初回起動時には、最初の `online` (当てはまる場合) イベントが少なくとも火を前に第 2 `connection.type` は`UNKNOWN`.
 
-`batterycritical`ハンドラーは 2 つのプロパティを格納しているオブジェクトに渡されます。
+### Windows Phone 7 の癖
 
-  * **レベル**： バッテリーの充電量 （0-100) の割合。*(数)*
+エミュレーターで実行しているとき、 `connection.status` は常に知られている、このイベントは*ない*火。
 
-  * **起こしたり**： デバイスが接続されてインチ*(ブール値)*かどうかを示すブール値
+### Windows Phone 8 癖
 
-通常アプリケーションに使用する必要があります `window.addEventListener` 一度のイベント リスナーをアタッチし、 `deviceready` イベントが発生します。
-
-### サポートされているプラットフォーム
-
-  * アマゾン火 OS
-  * iOS
-  * アンドロイド
-  * ブラックベリー 10
-  * Tizen
-  * Firefox の OS
-  * Windows (Windows Phone 8.1 のみ)
-
-### Windows の癖
-
-それはサポートされていないために、Windows Phone 8.1 は接続状態に関係なく`batterycritical`イベントを発生します。
-
-### 例
-
-    window.addEventListener("batterycritical", onBatteryCritical, false);
-    
-    function onBatteryCritical(info) {
-        // Handle the battery critical event
-        alert("Battery Level Critical " + info.level + "%\nRecharge Soon!");
-    }
-    
-
-## batterylow
-
-バッテリーの充電の割合がバッテリ低下しきい値、デバイス固有の値に達したときに発生します。
-
-`batterylow`ハンドラーは 2 つのプロパティを格納しているオブジェクトに渡されます。
-
-  * **レベル**： バッテリーの充電量 （0-100) の割合。*(数)*
-
-  * **起こしたり**： デバイスが接続されてインチ*(ブール値)*かどうかを示すブール値
-
-通常アプリケーションに使用する必要があります `window.addEventListener` 一度のイベント リスナーをアタッチし、 `deviceready` イベントが発生します。
-
-### サポートされているプラットフォーム
-
-  * アマゾン火 OS
-  * iOS
-  * アンドロイド
-  * ブラックベリー 10
-  * Tizen
-  * Firefox の OS
-  * Windows (Windows Phone 8.1 のみ)
-
-### Windows の癖
-
-それはサポートされていないために、Windows Phone 8.1 は接続状態に関係なく`batterylow`イベントを発生します。
-
-### 例
-
-    window.addEventListener("batterylow", onBatteryLow, false);
-    
-    function onBatteryLow(info) {
-        // Handle the battery low event
-        alert("Battery Level Low " + info.level + "%");
-    }
+エミュレーターと接続の種類のレポート `Cellular` は変化しません、イベントは*ない*火。

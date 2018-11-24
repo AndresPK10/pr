@@ -1,125 +1,62 @@
-// Type definitions for Apache Cordova BatteryStatus plugin
-// Project: https://github.com/apache/cordova-plugin-battery-status
+// Type definitions for Apache Cordova Network Information plugin
+// Project: https://github.com/apache/cordova-plugin-network-information
 // Definitions by: Microsoft Open Technologies Inc <http://msopentech.com>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // 
 // Copyright (c) Microsoft Open Technologies Inc
-// Licensed under the MIT license. 
+// Licensed under the MIT license
 
-interface Window {
-    onbatterystatus: (type: BatteryStatusEvent) => void;
-    onbatterycritical: (type: BatteryStatusEvent) => void;
-    onbatterylow: (type: BatteryStatusEvent) => void;
+interface Navigator {
     /**
-     * Adds a listener for an event from the BatteryStatus plugin.
-     * @param type      the event to listen for
-     *                  batterystatus: event fires when the percentage of battery charge
-     *                  changes by at least 1 percent, or if the device is plugged in or unplugged.
-     *                  batterycritical: event fires when the percentage of battery charge has reached
-     *                  the critical battery threshold. The value is device-specific.
-     *                  batterylow: event fires when the percentage of battery charge has
-     *                  reached the low battery threshold, device-specific value.
-     * @param listener  the function that executes when the event fires. The function is
-     *                  passed an BatteryStatusEvent object as a parameter.
+     * This plugin provides an implementation of an old version of the Network Information API.
+     * It provides information about the device's cellular and wifi connection, and whether the device has an internet connection.
      */
-    addEventListener(type: "batterystatus", listener: (ev: BatteryStatusEvent) => any, useCapture?: boolean): void;
-    /**
-     * Adds a listener for an event from the BatteryStatus plugin.
-     * @param type      the event to listen for
-     *                  batterystatus: event fires when the percentage of battery charge
-     *                  changes by at least 1 percent, or if the device is plugged in or unplugged.
-     *                  batterycritical: event fires when the percentage of battery charge has reached
-     *                  the critical battery threshold. The value is device-specific.
-     *                  batterylow: event fires when the percentage of battery charge has
-     *                  reached the low battery threshold, device-specific value.
-     * @param listener  the function that executes when the event fires. The function is
-     *                  passed an BatteryStatusEvent object as a parameter.
-     */
-    addEventListener(type: "batterycritical", listener: (ev: BatteryStatusEvent) => any, useCapture?: boolean): void;
-    /**
-     * Adds a listener for an event from the BatteryStatus plugin.
-     * @param type      the event to listen for
-     *                  batterystatus: event fires when the percentage of battery charge
-     *                  changes by at least 1 percent, or if the device is plugged in or unplugged.
-     *                  batterycritical: event fires when the percentage of battery charge has reached
-     *                  the critical battery threshold. The value is device-specific.
-     *                  batterylow: event fires when the percentage of battery charge has
-     *                  reached the low battery threshold, device-specific value.
-     * @param listener  the function that executes when the event fires. The function is
-     *                  passed an BatteryStatusEvent object as a parameter.
-     */
-    addEventListener(type: "batterylow", listener: (ev: BatteryStatusEvent) => any, useCapture?: boolean): void;
-    /**
-     * Adds a listener for an event from the BatteryStatus plugin.
-     * @param type      the event to listen for
-     *                  batterystatus: event fires when the percentage of battery charge
-     *                  changes by at least 1 percent, or if the device is plugged in or unplugged.
-     *                  batterycritical: event fires when the percentage of battery charge has reached
-     *                  the critical battery threshold. The value is device-specific.
-     *                  batterylow: event fires when the percentage of battery charge has
-     *                  reached the low battery threshold, device-specific value.
-     * @param listener  the function that executes when the event fires. The function is
-     *                  passed an BatteryStatusEvent object as a parameter.
-     */
-    addEventListener(type: string, listener: (ev: Event) => any, useCapture?: boolean): void;
-    /**
-     * Removes a listener for an event from the BatteryStatus plugin.
-     * @param type      The event to stop listening for.
-     *                  batterystatus: event fires when the percentage of battery charge
-     *                  changes by at least 1 percent, or if the device is plugged in or unplugged.
-     *                  batterycritical: event fires when the percentage of battery charge has reached
-     *                  the critical battery threshold. The value is device-specific.
-     *                  batterylow: event fires when the percentage of battery charge has
-     *                  reached the low battery threshold, device-specific value.
-     * @param callback  the function that executes when the event fires. The function is
-     *                  passed an BatteryStatusEvent object as a parameter.
-     */
-    removeEventListener(type: "batterystatus", listener: (ev: BatteryStatusEvent) => any, useCapture?: boolean): void;
-    /**
-     * Removes a listener for an event from the BatteryStatus plugin.
-     * @param type      The event to stop listening for.
-     *                  batterystatus: event fires when the percentage of battery charge
-     *                  changes by at least 1 percent, or if the device is plugged in or unplugged.
-     *                  batterycritical: event fires when the percentage of battery charge has reached
-     *                  the critical battery threshold. The value is device-specific.
-     *                  batterylow: event fires when the percentage of battery charge has
-     *                  reached the low battery threshold, device-specific value.
-     * @param callback  the function that executes when the event fires. The function is
-     *                  passed an BatteryStatusEvent object as a parameter.
-     */
-    removeEventListener(type: "batterycritical", listener: (ev: BatteryStatusEvent) => any, useCapture?: boolean): void;
-    /**
-     * Removes a listener for an event from the BatteryStatus plugin.
-     * @param type      The event to stop listening for.
-     *                  batterystatus: event fires when the percentage of battery charge
-     *                  changes by at least 1 percent, or if the device is plugged in or unplugged.
-     *                  batterycritical: event fires when the percentage of battery charge has reached
-     *                  the critical battery threshold. The value is device-specific.
-     *                  batterylow: event fires when the percentage of battery charge has
-     *                  reached the low battery threshold, device-specific value.
-     * @param callback  the function that executes when the event fires. The function is
-     *                  passed an BatteryStatusEvent object as a parameter.
-     */
-    removeEventListener(type: "batterylow", listener: (ev: BatteryStatusEvent) => any, useCapture?: boolean): void;
-    /**
-     * Removes a listener for an event from the BatteryStatus plugin.
-     * @param type      The event to stop listening for.
-     *                  batterystatus: event fires when the percentage of battery charge
-     *                  changes by at least 1 percent, or if the device is plugged in or unplugged.
-     *                  batterycritical: event fires when the percentage of battery charge has reached
-     *                  the critical battery threshold. The value is device-specific.
-     *                  batterylow: event fires when the percentage of battery charge has
-     *                  reached the low battery threshold, device-specific value.
-     * @param callback  the function that executes when the event fires. The function is
-     *                  passed an BatteryStatusEvent object as a parameter.
-     */
-    removeEventListener(type: string, listener: (ev: Event) => any, useCapture?: boolean): void;
+    connection: Connection;
+    // see https://github.com/apache/cordova-plugin-network-information/blob/dev/doc/index.md#api-change
+    // for 
+    network: {
+        /**
+         * This plugin provides an implementation of an old version of the Network Information API.
+         * It provides information about the device's cellular and wifi connection, and whether the device has an internet connection.
+         */
+        connection: Connection
+    }
 }
 
-/** Object, that passed into battery event listener */
-interface BatteryStatusEvent extends Event {
-	/* The percentage of battery charge (0-100). */
-    level: number;
-	/* A boolean that indicates whether the device is plugged in. */
-    isPlugged: boolean;
+interface Document {
+    addEventListener(type: "online", connectionStateCallback: () => any, useCapture?: boolean): void;
+    addEventListener(type: "offline", connectionStateCallback: () => any, useCapture?: boolean): void;
+}
+
+/**
+ * The connection object, exposed via navigator.connection, provides information
+ * about the device's cellular and wifi connection.
+ */
+interface Connection {
+    /**
+     * This property offers a fast way to determine the device's network connection state, and type of connection.
+     * One of:
+     *     Connection.UNKNOWN
+     *     Connection.ETHERNET
+     *     Connection.WIFI
+     *     Connection.CELL_2G
+     *     Connection.CELL_3G
+     *     Connection.CELL_4G
+     *     Connection.CELL
+     *     Connection.NONE
+     */
+    type: string;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean): void;
+}
+
+declare var Connection: {
+    UNKNOWN: string;
+    ETHERNET: string;
+    WIFI: string;
+    CELL_2G: string;
+    CELL_3G: string;
+    CELL_4G: string;
+    CELL: string;
+    NONE: string;
 }
